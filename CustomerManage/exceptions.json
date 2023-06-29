@@ -1,0 +1,15 @@
+[
+  {
+    "code": 4010,
+    "message": "Authorization has been denied for this request"
+  },
+  {
+    "code": 5000,
+    "message": "An error has occured"
+  },
+  {
+    "code": 4040,
+    "message": "Not found data for action"
+  }
+
+]
