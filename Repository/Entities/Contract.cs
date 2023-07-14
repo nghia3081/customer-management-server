@@ -21,6 +21,7 @@ namespace Repository.Entities
         public DateTime? LicenseEndDate { get; set; }
         public DateTime? InvoiceExportedDate { get; set; }
         public bool IsNew { get; set; }
+        public bool IsSigned { get; set; }
         public int StatusId { get; set; }
         [ForeignKey(nameof(StatusId))]
         public StatusCategory StatusCategory { get; set; } = null!;

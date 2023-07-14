@@ -1,6 +1,7 @@
 using BusinessObject;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.NewtonsoftJson;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
@@ -15,7 +16,7 @@ static IEdmModel GetEdmModel()
     builder.EntitySet<Repository.Entities.ContractDetail>("ContractDetail");
     builder.EntitySet<Repository.Entities.Customer>("Customer");
     builder.EntitySet<Repository.Entities.Menu>("Menu");
-    builder.EntitySet<Repository.Entities.Package>("PackageCategory");
+    builder.EntitySet<Repository.Entities.Package>("Package");
     builder.EntitySet<Repository.Entities.StatusCategory>("StatusCategory");
     builder.EntitySet<Repository.Entities.TaxCategory>("TaxCategory");
     builder.EntitySet<Repository.Entities.User>("User");
@@ -26,12 +27,18 @@ static IEdmModel GetEdmModel()
 var builder = WebApplication.CreateBuilder(args);
 var corsPolicy = "CorsPolicy";
 // Add services to the container.
-builder.Services.AddControllers().AddOData(option =>
+builder.Services
+    .AddControllers()
+    .AddNewtonsoftJson(option =>
+    {
+        option.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    })
+    .AddOData(option =>
 {
     option.Select().Filter().Count().OrderBy().Expand()
-    .SetMaxTop(100).AddRouteComponents("odata", GetEdmModel());
+    .SetMaxTop(50).AddRouteComponents("odata", GetEdmModel());
     option.EnableContinueOnErrorHeader = true;
-}); ;
+}).AddODataNewtonsoftJson();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(corsPolicy, build => build.AllowAnyMethod()

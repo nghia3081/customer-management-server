@@ -3,7 +3,6 @@ using BusinessObject;
 using CusomterManager.Controllers.Base;
 using Microsoft.Extensions.Options;
 using Repository.IRepositories;
-using Repository.IRepositories.Base;
 
 namespace Api.Controllers
 {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace BusinessObject.Models
 {
@@ -18,5 +13,11 @@ namespace BusinessObject.Models
     {
         public string Token { get; set; } = null!;
         public DateTime Expire { get; set; }
+        public string Username { get; set; } = null!;
+        public string Phone { get; set; } = null!;
+        public string Email { get; set; } = null!;
+        public string FullName { get; set; } = null!;
+        public bool IsAdmin { get; set; }
+        public bool IsBlocked { get; set; }
     }
 }

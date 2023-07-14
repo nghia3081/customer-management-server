@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using BusinessObject;
+using BusinessObject.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.Extensions.Options;
@@ -22,11 +24,24 @@ namespace CusomterManager.Controllers.Base
             this.mapper = mapper;
             appSetting = options.Value;
         }
-        [EnableQuery]
+        [EnableQuery()]
         [HttpGet()]
-        public virtual ActionResult Get()
+        public virtual IActionResult Get()
         {
             return Ok(repository.Entities.AsQueryable());
+        }
+        [HttpGet("get-with-custom-response")]
+        public virtual IActionResult GetWithCustomResponse(ODataQueryOptions<TEntity> odataOptions)
+        {
+            var data = odataOptions.ApplyTo(repository.Entities.AsQueryable());
+            var odataFeature = HttpContext.ODataFeature();
+            var response = new ClientOdataResponseFormat<TEntity>()
+            {
+                Pos = odataOptions.Skip == null ? 0 : odataOptions.Skip.Value,
+                Total = odataFeature.TotalCount ?? 0,
+                Data = data,
+            };
+            return Ok(response);
         }
         [EnableQuery]
         [HttpGet("single")]
@@ -46,9 +61,9 @@ namespace CusomterManager.Controllers.Base
             return await repository.Update(businessObject);
         }
         [HttpDelete("{id}")]
-        public virtual async Task<TBusinessObject> Delete(TBusinessObject businessObject)
+        public virtual async Task<TBusinessObject> Delete(TKeyType id)
         {
-            return await repository.Delete(businessObject);
+            return await repository.Delete(id);
         }
     }
 }

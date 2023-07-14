@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace BusinessObject.Models
+﻿namespace BusinessObject.Models
 {
     public class Menu
     {

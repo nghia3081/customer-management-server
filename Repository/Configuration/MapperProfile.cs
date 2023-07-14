@@ -23,6 +23,7 @@ namespace Repository.Configuration
             this.CreateMap<Repository.Entities.StatusCategory, BusinessObject.Models.StatusCategory>();
             this.CreateMap<Repository.Entities.TaxCategory, BusinessObject.Models.TaxCategory>();
             this.CreateMap<Repository.Entities.User, BusinessObject.Models.User>();
+            this.CreateMap<Repository.Entities.User, BusinessObject.Models.LoginResponse>();
         }
     }
 }

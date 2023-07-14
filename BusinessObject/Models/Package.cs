@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace BusinessObject.Models
+﻿namespace BusinessObject.Models
 {
     public class Package
     {
@@ -18,7 +15,7 @@ namespace BusinessObject.Models
         public decimal UnitPrice { get; set; }
         public DateTime CreatedDate { get; set; }
         public int TaxCategoryId { get; set; }
-        public TaxCategory TaxCategory { get; set; } = null!;
+        public TaxCategory? TaxCategory { get; set; }
         public ICollection<ContractDetail> ContractDetails { get; set; }
 
     }

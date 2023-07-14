@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+﻿using Newtonsoft.Json;
 
 namespace BusinessObject
 {
@@ -11,10 +11,7 @@ namespace BusinessObject
     public class CustomerManagementException : Exception
     {
         private static readonly IEnumerable<DefinedException> definedExceptions
-        = JsonSerializer.Deserialize<IEnumerable<DefinedException>>(File.ReadAllText("exceptions.json") ?? string.Empty, new JsonSerializerOptions()
-        {
-            PropertyNameCaseInsensitive = true,
-        }) ?? Enumerable.Empty<DefinedException>();
+        = JsonConvert.DeserializeObject<IEnumerable<DefinedException>>(File.ReadAllText("exceptions.json") ?? string.Empty) ?? Enumerable.Empty<DefinedException>();
 
         public Guid TracingId { get; private set; }
         public int ExceptionCode { get; private set; }

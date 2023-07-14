@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using BusinessObject;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Routing.Attributes;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
+using System.Security.Claims;
 
 namespace CusomterManager.Controllers.Base
 {
@@ -13,10 +15,12 @@ namespace CusomterManager.Controllers.Base
     public class BaseController : ODataController
     {
         [ApiExplorerSettings(IgnoreApi = true)]
-        public string GetUser()
+        public string GetLoggedInUsername()
         {
-            var a = User;
-            return string.Empty;
+            var user = this.User;
+            string username = user.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value
+                ?? throw new CustomerManagementException(4010);
+            return username;
         }
     }
 }

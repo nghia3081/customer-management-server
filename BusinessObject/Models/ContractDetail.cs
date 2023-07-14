@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace BusinessObject.Models
+﻿namespace BusinessObject.Models
 {
     public class ContractDetail
     {
@@ -15,7 +12,7 @@ namespace BusinessObject.Models
         public int Quantity { get; set; }
         public float Discount { get; set; }
         public int TaxValue { get; set; }
-        public Contract Contract { get; set; } = null!;
+        public Contract? Contract { get; set; } = null!;
         public Package? Package { get; set; }
     }
 }

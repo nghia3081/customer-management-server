@@ -7,6 +7,7 @@
             Id = Guid.NewGuid();
             CreatedDate = DateTime.Now;
             Details = new HashSet<ContractDetail>();
+            StatusId = 1;
         }
         public Guid Id { get; set; }
         public Guid CustomerId { get; set; }
@@ -18,8 +19,8 @@
         public DateTime? InvoiceExportedDate { get; set; }
         public bool IsNew { get; set; }
         public int StatusId { get; set; }
-        public StatusCategory StatusCategory { get; set; } = null!;
+        public StatusCategory? StatusCategory { get; set; } = null!;
         public ICollection<ContractDetail> Details { get; set; }
-        public Customer Customer { get; set; } = null!;
+        public Customer? Customer { get; set; } = null!;
     }
 }

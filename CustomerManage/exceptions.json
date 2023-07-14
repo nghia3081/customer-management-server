@@ -10,6 +10,33 @@
   {
     "code": 4040,
     "message": "Not found data for action"
+  },
+  {
+    "code": 4001,
+    "message": "Contract has been sent to approve before. Can not send anymore"
+  },
+  {
+    "code": 4002,
+    "message": "Start license date can not be smaller end license date of this customer"
+  },
+  {
+    "code": 4003,
+    "message": "Contract has been sent to approve or active license or exported invoice, can not remove"
+  },
+  {
+    "code": 4004,
+    "message": "This customer has existed contract, can not remove"
+  },
+  {
+    "code": 4005,
+    "message": "This contract has been exported invoice before"
+  },
+  {
+    "code": 4006,
+    "message": "This contract is not waiting for approve"
+  },
+  {
+    "code": 4007,
+    "message": "This contract has been signed before"
   }
-
 ]

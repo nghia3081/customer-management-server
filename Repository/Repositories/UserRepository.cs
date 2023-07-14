@@ -5,9 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Repository.Entities;
 using Repository.IRepositories;
-using Repository.IRepositories.Base;
 using Repository.Repositories.Base;
-using System.Threading;
 
 namespace Repository.Repositories
 {
@@ -19,7 +17,7 @@ namespace Repository.Repositories
             this.appSetting = options.Value;
         }
 
-        public async Task<(string token, DateTime expire)> Login(string username, string password)
+        public async Task<BusinessObject.Models.LoginResponse> Login(string username, string password)
         {
 
             Repository.Entities.User user = await base.Entities.FirstOrDefaultAsync(u => u.Username == username)
@@ -27,7 +25,11 @@ namespace Repository.Repositories
             var hashService = new HashServices(password, appSetting.HashSalt);
             if (hashService.IsPassed(user.Password))
             {
-                return HashServices.GenerateJwtToken(appSetting.Jwt, user.Username);
+                var response = mapper.Map<BusinessObject.Models.LoginResponse>(user);
+                var (token, expires) = HashServices.GenerateJwtToken(appSetting.Jwt, user.Username);
+                response.Token = token;
+                response.Expire = expires;
+                return response;
             }
             throw new CustomerManagementException(4010);
 
@@ -37,6 +39,17 @@ namespace Repository.Repositories
             HashServices hashServices = new(user.Password, appSetting.HashSalt);
             user.Password = hashServices.EncryptedPassword;
             return base.Create(user);
+        }
+
+        public async Task<BusinessObject.Models.User> UpdateInformation(BusinessObject.Models.UpdateUserInformationDto user)
+        {
+            var rawUser = await this.Find(user.Username);
+            rawUser.Phone = user.Phone;
+            rawUser.Email = user.Email;
+            rawUser.FullName = user.FullName;
+            this.entities.Update(rawUser);
+            await this.context.SaveChangesAsync();
+            return user;
         }
     }
 }
