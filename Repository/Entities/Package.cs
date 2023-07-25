@@ -21,8 +21,8 @@ namespace Repository.Entities
         public DateTime CreatedDate { get; set; }
         public int TaxCategoryId { get; set; }
         [ForeignKey(nameof(TaxCategoryId))]
-        public TaxCategory TaxCategory { get; set; } = null!;
-        public ICollection<ContractDetail> ContractDetails { get; set; }
+        public virtual TaxCategory TaxCategory { get; set; } = null!;
+        public virtual ICollection<ContractDetail> ContractDetails { get; set; }
 
     }
 }

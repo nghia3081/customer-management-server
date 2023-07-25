@@ -24,7 +24,7 @@ namespace Repository.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-                        modelBuilder.Entity<Customer>().HasIndex(customer => customer.TaxCode).IsUnique(unique: true);
+            modelBuilder.Entity<Customer>().HasIndex(customer => customer.TaxCode).IsUnique(unique: true);
             base.OnModelCreating(modelBuilder);
         }
     }

@@ -1,15 +1,28 @@
 ﻿using AutoMapper;
 using BusinessObject;
+using BusinessObject.Models;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Repository.Configuration;
 using Repository.Entities;
 using Repository.IRepositories;
+using Repository.IRepositories.IServices;
 using Repository.Repositories.Base;
+using System.Net.Mail;
 
 namespace Repository.Repositories
 {
     internal class ContractRepository : GenericRepository<BusinessObject.Models.Contract, Entities.Contract>, IContractRepository
     {
-        public ContractRepository(CustomerManageContext context, IMapper mapper) : base(context, mapper)
+        private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly IEmailService emailService;
+        public ContractRepository(CustomerManageContext context,
+            IMapper mapper,
+            IWebHostEnvironment webHostEnvironment,
+            IEmailService emailService) : base(context, mapper)
         {
+            this.webHostEnvironment = webHostEnvironment;
+            this.emailService = emailService;
         }
 
         public async Task<BusinessObject.Models.Contract> ActiveLicense(Guid contractId, DateTime licenseStartDate)
@@ -83,8 +96,12 @@ namespace Repository.Repositories
         public async Task<BusinessObject.Models.Contract> Approve(Guid contractId)
         {
             var contract = await this.Find(contractId);
-            if (contract.StatusId < 2)
+            if (contract.StatusId != 2)
                 throw new CustomerManagementException(4006);
+            if(contract.LicenseStartDate == null)
+            {
+                throw new CustomerManagementException(4015);
+            }
             contract.StatusId = 3;
             entities.Update(contract);
             await context.SaveChangesAsync();
@@ -94,7 +111,7 @@ namespace Repository.Repositories
         public async Task<BusinessObject.Models.Contract> Reject(Guid contractId)
         {
             var contract = await this.Find(contractId);
-            if (contract.StatusId < 2)
+            if (contract.StatusId != 2)
                 throw new CustomerManagementException(4006);
             contract.StatusId = 6;
             entities.Update(contract);
@@ -102,31 +119,49 @@ namespace Repository.Repositories
             return mapper.Map<BusinessObject.Models.Contract>(contract);
         }
 
-        public Task<bool> SendToCustomer(Guid contractId)
+        public async Task SendToCustomer(Guid contractId)
         {
-            throw new NotImplementedException();
+            var contract = await this.Find(contractId);
+            if (contract.StatusId < 4 || contract.StatusId == 6)
+            {
+                throw new CustomerManagementException(4009);
+            }
+            var contractFile = await this.PrintPdf(contractId);
+            string path = Path.Combine(webHostEnvironment.WebRootPath, "templates/email/send-contract-to-customer.html");
+            var contractMailContent = File.ReadAllText(path);
+            contractMailContent = contractMailContent.Replace("{customerName}", contract.Customer.Name);
+            MailMessage mailMessage = emailService.CreateMailMessage("Get your contract", contractMailContent, true, contract.Customer.Email);
+            mailMessage = emailService.AttachFile(mailMessage, contractFile);
+            await emailService.SendMessage(mailMessage);
+            contract.StatusId = 5;
+            this.entities.Update(contract);
+            await this.context.SaveChangesAsync();
         }
 
         public async Task<byte[]> PrintPdf(Guid contractId)
         {
             var contract = await this.Find(contractId);
-            string contractFilePath = $"contracts\\printed\\{contractId}.pdf";
-            if (File.Exists(contractFilePath))
+            string path = Path.Combine(webHostEnvironment.WebRootPath, $"contracts\\{contractId}.pdf");
+            if (File.Exists(path))
             {
-                return File.ReadAllBytes(contractFilePath);
+                return File.ReadAllBytes(path);
             }
-            string contractFileTemplate = $"contracts\\template\\{contractId}.repx";
-            var data = await FilePrinting.Print(contract, contractFileTemplate);
-            File.WriteAllBytes(contractFilePath, data);
+            string templatePath = Path.Combine(webHostEnvironment.WebRootPath, "templates\\contract\\template.html");
+            var data = await FilePrinting.PrintContract(templatePath, mapper.Map<BusinessObject.Models.Contract>(contract));
+            // File.WriteAllBytes(path, data);
             return data;
         }
 
         public async Task<byte[]> SignPdf(Guid contractId)
         {
             var contract = await this.Find(contractId);
+            if (contract.StatusId < 3 || contract.StatusId == 6)
+            {
+                throw new CustomerManagementException(4014);
+            }
             if (contract.IsSigned)
                 throw new CustomerManagementException(4007);
-            string contractFilePath = $"contracts\\printed\\{contractId}.pdf";
+            string contractFilePath = Path.Combine(webHostEnvironment.WebRootPath, $"contracts\\{contractId}.pdf");
             byte[] contractFileByte;
             if (File.Exists(contractFilePath))
             {
@@ -136,11 +171,54 @@ namespace Repository.Repositories
             {
                 contractFileByte = await PrintPdf(contractId);
             }
-            var data = await FilePrinting.SignPdf(contractFileByte, "certificate-other.pfx", "nghia", mapper.Map<BusinessObject.Models.Contract>(contract));
+            string certPath = webHostEnvironment.WebRootPath + "/signatures/cert-m.p12";
+            string certLogoPath = webHostEnvironment.WebRootPath + "/images/logo/logo.png";
+            var data = await FilePrinting.SignPdf(contractFileByte, certPath, "2e0bBi7G", certLogoPath);
             contract.IsSigned = true;
+            contract.StatusId = 4;
             this.entities.Update(contract);
             await this.context.SaveChangesAsync();
+            await File.WriteAllBytesAsync(contractFilePath, data);
             return data;
+        }
+
+        public async Task<IEnumerable<Report<long>>> GetNumberContractsReports(BusinessObject.Models.User user, int? year = null)
+        {
+            year ??= DateTime.Now.Year;
+            int month = 1;
+            IEnumerable<Report<long>> reports = Enumerable.Empty<Report<long>>();
+            while (month <= 12)
+            {
+                var dataInMonth = await this.entities
+                    .Where(c => c.CreatedDate.Year == year
+                            && (user.IsAdmin || c.CreatedBy.Equals(user.Username))
+                            && c.CreatedDate.Month == month
+                            && c.IsSigned
+                            )
+                    .CountAsync();
+                reports = reports.Append(new Report<long> { Month = month, MonthValue = dataInMonth });
+                month++;
+            }
+            return reports;
+        }
+
+        public async Task<IEnumerable<Report<decimal>>> GetIncomeValueReports(BusinessObject.Models.User user, int? year = null)
+        {
+            year ??= DateTime.Now.Year;
+            int month = 1;
+            IEnumerable<Report<decimal>> reports = Enumerable.Empty<Report<decimal>>();
+            while (month <= 12)
+            {
+                var detail = await this.context.ContractDetails
+                    .Where(c => c.Contract.CreatedDate.Year == year
+                    && (user.IsAdmin || c.Contract.CreatedBy.Equals(user.Username))
+                    && c.Contract.CreatedDate.Month == month
+                     && c.Contract.IsSigned)
+                    .SumAsync(dt => (dt.UnitPrice * dt.Quantity) - (dt.UnitPrice * dt.Quantity * (decimal)dt.Discount / 100) - (dt.UnitPrice * dt.Quantity * dt.TaxValue / 100));
+                reports = reports.Append(new Report<decimal> { Month = month, MonthValue = detail });
+                month++;
+            }
+            return reports;
         }
     }
 }

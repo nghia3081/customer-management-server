@@ -15,18 +15,18 @@ namespace Api.Controllers
         public CustomerController(ICustomerRepository repository, IMapper mapper, IOptions<AppSetting> options) : base(repository, mapper, options)
         {
         }
-        [HttpPost]
         public override Task<Customer> Create(Customer businessObject)
         {
 
-            businessObject.CreatedBy = base.GetLoggedInUsername();
+            businessObject.CreatedBy = base.GetLoggedInUser().Username;
             return base.Create(businessObject);
         }
         [HttpGet("get-with-custom-response")]
         public override IActionResult GetWithCustomResponse(ODataQueryOptions<Repository.Entities.Customer> odataOptions)
         {
-            string username = GetLoggedInUsername();
-            var customerSet = this.repository.Entities.Where(c => c.CreatedBy.Equals(username));
+            var user = GetLoggedInUser();
+            string username = user.Username;
+            var customerSet = this.repository.Entities.Where(c => user.IsAdmin || c.CreatedBy.Equals(username));
             var data = odataOptions.ApplyTo(customerSet);
             var odataFeature = HttpContext.ODataFeature();
             var response = new ClientOdataResponseFormat<Repository.Entities.Customer>()
@@ -36,6 +36,14 @@ namespace Api.Controllers
                 Data = data,
             };
             return Ok(response);
+        }
+        [HttpGet("get-number-customers")]
+        public async Task<IEnumerable<Report<long>>> GetNumberCustomers(int? year = null)
+        {
+            var user = this.GetLoggedInUser();
+            var result = await (repository as ICustomerRepository).GetNumberCustomerReportsAsync(user, year);
+
+            return result;
         }
     }
 }

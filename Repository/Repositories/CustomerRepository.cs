@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using BusinessObject;
+using BusinessObject.Models;
+using Microsoft.EntityFrameworkCore;
 using Repository.Entities;
 using Repository.IRepositories;
 using Repository.Repositories.Base;
@@ -20,6 +22,25 @@ namespace Repository.Repositories
             this.Entities.Remove(customer);
             this.context.SaveChanges();
             return mapper.Map<BusinessObject.Models.Customer>(customer);
+        }
+
+        public async Task<IEnumerable<Report<long>>> GetNumberCustomerReportsAsync(BusinessObject.Models.User user, int? year = null)
+        {
+            year ??= DateTime.Now.Year;
+            int month = 1;
+            IEnumerable<Report<long>> reports = Enumerable.Empty<Report<long>>();
+            while (month <= 12)
+            {
+                var dataInMonth = await this.entities
+                    .Where(c => c.CreatedDate.Year == year
+                    && (user.IsAdmin || c.CreatedBy == user.Username)
+                            && c.CreatedDate.Month == month
+                            )
+                    .CountAsync();
+                reports = reports.Append(new Report<long> { Month = month, MonthValue = dataInMonth });
+                month++;
+            }
+            return reports;
         }
     }
 }

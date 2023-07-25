@@ -12,7 +12,7 @@ using Repository.Entities;
 namespace Repository.Migrations
 {
     [DbContext(typeof(CustomerManageContext))]
-    [Migration("20230626171840_init")]
+    [Migration("20230723080803_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,21 @@ namespace Repository.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("MenuUser", b =>
+                {
+                    b.Property<string>("MenusMenuId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UsersUsername")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("MenusMenuId", "UsersUsername");
+
+                    b.HasIndex("UsersUsername");
+
+                    b.ToTable("MenuUser");
+                });
 
             modelBuilder.Entity("Repository.Entities.Contract", b =>
                 {
@@ -37,6 +52,10 @@ namespace Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
@@ -47,6 +66,9 @@ namespace Repository.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsNew")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSigned")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LicenseEndDate")
@@ -293,19 +315,19 @@ namespace Repository.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Repository.Entities.UserMenu", b =>
+            modelBuilder.Entity("MenuUser", b =>
                 {
-                    b.Property<string>("MenuId")
-                        .HasColumnType("nvarchar(450)");
+                    b.HasOne("Repository.Entities.Menu", null)
+                        .WithMany()
+                        .HasForeignKey("MenusMenuId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<string>("Username")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("MenuId", "Username");
-
-                    b.HasIndex("Username");
-
-                    b.ToTable("UserMenus");
+                    b.HasOne("Repository.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersUsername")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Repository.Entities.Contract", b =>
@@ -377,25 +399,6 @@ namespace Repository.Migrations
                     b.Navigation("TaxCategory");
                 });
 
-            modelBuilder.Entity("Repository.Entities.UserMenu", b =>
-                {
-                    b.HasOne("Repository.Entities.Menu", "Menu")
-                        .WithMany("UserMenus")
-                        .HasForeignKey("MenuId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Repository.Entities.User", "User")
-                        .WithMany("UserMenus")
-                        .HasForeignKey("Username")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Menu");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Repository.Entities.Contract", b =>
                 {
                     b.Navigation("Details");
@@ -409,8 +412,6 @@ namespace Repository.Migrations
             modelBuilder.Entity("Repository.Entities.Menu", b =>
                 {
                     b.Navigation("ChildMenus");
-
-                    b.Navigation("UserMenus");
                 });
 
             modelBuilder.Entity("Repository.Entities.Package", b =>
@@ -426,8 +427,6 @@ namespace Repository.Migrations
             modelBuilder.Entity("Repository.Entities.User", b =>
                 {
                     b.Navigation("Customers");
-
-                    b.Navigation("UserMenus");
                 });
 #pragma warning restore 612, 618
         }

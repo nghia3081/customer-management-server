@@ -36,13 +36,17 @@ namespace DataAccess.Utils
             numBytesRequested: numByteRequested
              );
         }
-        public static (string token, DateTime expires) GenerateJwtToken(BusinessObject.Jwt jwtSetting, string username)
+        public static (string token, DateTime expires) GenerateJwtToken(BusinessObject.Jwt jwtSetting, Repository.Entities.User user)
         {
             var claims = new[] {
                         new Claim(JwtRegisteredClaimNames.Sub, jwtSetting.Subject),
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                         new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
-                        new Claim(ClaimTypes.Name, username),
+                        new Claim(ClaimTypes.Name, user.Username),
+                        new Claim(ClaimTypes.Email, user.Email),
+                        new Claim(ClaimTypes.MobilePhone, user.Phone),
+                        new Claim(ClaimTypes.Role, user.IsAdmin.ToString()),
+                        //new Claim(ClaimTypes.Name, user.FullName),
                     };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.Key));
             var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

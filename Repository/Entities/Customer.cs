@@ -22,7 +22,7 @@ namespace Repository.Entities
         public DateTime CreatedDate { get; set; }
         public string CreatedBy { get; set; } = null!;
         [ForeignKey(nameof(CreatedBy))]
-        public User CreatedByNavigation { get; set; } = null!;
+        public virtual User CreatedByNavigation { get; set; } = null!;
         public ICollection<Contract> Contracts { get; set; }
 
     }

@@ -19,7 +19,7 @@ namespace Repository.Entities
         public string FullName { get; set; } = null!;
         public bool IsAdmin { get; set; }
         public bool IsBlocked { get; set; }
-        public ICollection<Customer> Customers { get; set; }
-        public ICollection<Menu> Menus { get; set; }
+        public virtual ICollection<Customer> Customers { get; set; }
+        public virtual ICollection<Menu> Menus { get; set; }
     }
 }

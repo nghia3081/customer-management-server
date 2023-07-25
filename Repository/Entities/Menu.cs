@@ -18,8 +18,8 @@ namespace Repository.Entities
         public int Order { get; set; }
         public string? ParentMenuId { get; set; }
         [ForeignKey(nameof(ParentMenuId))]
-        public Menu? ParentMenu { get; set; }
-        public ICollection<Menu> ChildMenus { get; set; }
-        public ICollection<User> Users { get; set; }
+        public virtual Menu? ParentMenu { get; set; }
+        public virtual ICollection<Menu> ChildMenus { get; set; }
+        public virtual ICollection<User> Users { get; set; }
     }
 }

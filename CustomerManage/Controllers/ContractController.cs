@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BusinessObject;
+using BusinessObject.Models;
 using CusomterManager.Controllers.Base;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -13,6 +14,11 @@ namespace Api.Controllers
         public ContractController(IContractRepository repository, IMapper mapper, IOptions<AppSetting> options) : base(repository, mapper, options)
         {
             this.contractRepository = repository;
+        }
+        public override Task<Contract> Create(Contract businessObject)
+        {
+            businessObject.CreatedBy = this.GetLoggedInUser().Username;
+            return base.Create(businessObject);
         }
         [HttpPatch("{id}/send-to-approve")]
         public async Task<BusinessObject.Models.Contract> SendToApprove(Guid id)
@@ -49,7 +55,28 @@ namespace Api.Controllers
         public async Task<IActionResult> Sign(Guid id)
         {
             var data = await contractRepository.SignPdf(id);
-            return File(data, "application/pdf");
+            return NoContent();
+        }
+        [HttpPatch("{id}/send-to-customer")]
+        public async Task SendToCustomer(Guid id)
+        {
+            await contractRepository.SendToCustomer(id);
+        }
+        [HttpGet("get-number-contracts")]
+        public async Task<IEnumerable<Report<long>>> GetNumberContracts(int? year = null)
+        {
+            var user = this.GetLoggedInUser();
+            var result = await (repository as IContractRepository).GetNumberContractsReports(user, year);
+
+            return result;
+        }
+        [HttpGet("get-income-value")]
+        public async Task<IEnumerable<Report<decimal>>> GetIncomeValue(int? year = null)
+        {
+            var user = this.GetLoggedInUser();
+            var result = await (repository as IContractRepository).GetIncomeValueReports(user, year);
+
+            return result;
         }
     }
 }

@@ -18,8 +18,8 @@ namespace Repository.Entities
         public float Discount { get; set; }
         public int TaxValue { get; set; }
         [ForeignKey(nameof(ContractId))]
-        public Contract Contract { get; set; } = null!;
+        public virtual Contract Contract { get; set; } = null!;
         [ForeignKey(nameof(PackageCode))]
-        public Package? Package { get; set; }
+        public virtual Package? Package { get; set; }
     }
 }

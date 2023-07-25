@@ -6,8 +6,10 @@ using Microsoft.IdentityModel.Tokens;
 using Repository.Entities;
 using Repository.IRepositories;
 using Repository.IRepositories.Base;
+using Repository.IRepositories.IServices;
 using Repository.Repositories;
 using Repository.Repositories.Base;
+using Repository.Repositories.Services;
 using System.Text;
 
 namespace Repository.Configuration
@@ -23,10 +25,9 @@ namespace Repository.Configuration
                 .AddScoped<IMenuRepository, MenuRepository>()
                 .AddScoped<IPackageRepository, PackageRepository>()
                 .AddScoped<IUserRepository, UserRepository>()
+                .AddSingleton<IEmailService, EmailService>()
                 .AddScoped<ICategoryRepository<Repository.Entities.StatusCategory, BusinessObject.Models.StatusCategory>, CategoryRepository<Repository.Entities.StatusCategory, BusinessObject.Models.StatusCategory>>()
-                .AddScoped<ICategoryRepository<Repository.Entities.TaxCategory, BusinessObject.Models.TaxCategory>, CategoryRepository<Repository.Entities.TaxCategory, BusinessObject.Models.TaxCategory>>()
-
-                ;
+                .AddScoped<ICategoryRepository<Repository.Entities.TaxCategory, BusinessObject.Models.TaxCategory>, CategoryRepository<Repository.Entities.TaxCategory, BusinessObject.Models.TaxCategory>>();
         }
         public static IServiceCollection AddJwtAuthentication(this IServiceCollection services)
         {

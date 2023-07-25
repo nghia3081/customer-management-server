@@ -41,8 +41,11 @@ builder.Services
 }).AddODataNewtonsoftJson();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(corsPolicy, build => build.AllowAnyMethod()
-        .AllowAnyHeader().AllowCredentials().SetIsOriginAllowed(hostName => true).Build());
+    options.AddPolicy(corsPolicy,
+        build => build
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials().SetIsOriginAllowed(hostName => true).Build());
 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -81,11 +84,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors(corsPolicy);
 
 app.UseHttpsRedirection();
 app.UseExceptionHandler("/error");
 app.UseAuthorization();
-
+app.UseStaticFiles();
 app.MapControllers();
+app.UseCors(corsPolicy);
+
 app.Run();

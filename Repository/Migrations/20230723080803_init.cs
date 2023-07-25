@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -124,24 +125,24 @@ namespace Repository.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserMenus",
+                name: "MenuUser",
                 columns: table => new
                 {
-                    MenuId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Username = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    MenusMenuId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UsersUsername = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserMenus", x => new { x.MenuId, x.Username });
+                    table.PrimaryKey("PK_MenuUser", x => new { x.MenusMenuId, x.UsersUsername });
                     table.ForeignKey(
-                        name: "FK_UserMenus_Menus_MenuId",
-                        column: x => x.MenuId,
+                        name: "FK_MenuUser_Menus_MenusMenuId",
+                        column: x => x.MenusMenuId,
                         principalTable: "Menus",
                         principalColumn: "MenuId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserMenus_Users_Username",
-                        column: x => x.Username,
+                        name: "FK_MenuUser_Users_UsersUsername",
+                        column: x => x.UsersUsername,
                         principalTable: "Users",
                         principalColumn: "Username",
                         onDelete: ReferentialAction.Cascade);
@@ -154,12 +155,14 @@ namespace Repository.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ActivatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     LicenseStartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     LicenseEndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     InvoiceExportedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsNew = table.Column<bool>(type: "bit", nullable: false),
+                    IsSigned = table.Column<bool>(type: "bit", nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -248,14 +251,14 @@ namespace Repository.Migrations
                 column: "ParentMenuId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MenuUser_UsersUsername",
+                table: "MenuUser",
+                column: "UsersUsername");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Packages_TaxCategoryId",
                 table: "Packages",
                 column: "TaxCategoryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserMenus_Username",
-                table: "UserMenus",
-                column: "Username");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -264,7 +267,7 @@ namespace Repository.Migrations
                 name: "ContractDetails");
 
             migrationBuilder.DropTable(
-                name: "UserMenus");
+                name: "MenuUser");
 
             migrationBuilder.DropTable(
                 name: "Contracts");

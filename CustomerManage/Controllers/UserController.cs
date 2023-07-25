@@ -31,5 +31,29 @@ namespace Api.Controllers
         {
             return await (repository as IUserRepository).UpdateInformation(user);
         }
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
+        {
+            changePasswordDto.UserName = base.GetLoggedInUser().Username;
+            _ = await (repository as IUserRepository).ChangePassword(changePasswordDto);
+            return NoContent();
+        }
+        [HttpPatch("{username}/block")]
+        public async Task<BusinessObject.Models.User> Block(string username)
+        {
+            return await (repository as IUserRepository).Block(username);
+        }
+        [HttpPut("permission")]
+        public async Task<BusinessObject.Models.User> Permission([FromBody] BusinessObject.Models.UpdateUserPermissionDto user)
+        {
+            return await (repository as IUserRepository).Permission(user);
+        }
+        [HttpPatch("reset-password")]
+        [AllowAnonymous]
+        public async Task<bool> ResetPassword(BusinessObject.Models.ResetPasswordDto resetPasswordDto)
+        {
+            return await (repository as IUserRepository).ResetPassword(resetPasswordDto);
+        }
+
     }
 }

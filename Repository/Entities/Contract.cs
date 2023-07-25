@@ -15,6 +15,7 @@ namespace Repository.Entities
         public Guid Id { get; set; }
         public Guid CustomerId { get; set; }
         public DateTime CreatedDate { get; set; }
+        public string CreatedBy { get; set; }
         public string Code { get; set; } = null!;
         public DateTime? ActivatedDate { get; set; }
         public DateTime? LicenseStartDate { get; set; }
@@ -24,9 +25,9 @@ namespace Repository.Entities
         public bool IsSigned { get; set; }
         public int StatusId { get; set; }
         [ForeignKey(nameof(StatusId))]
-        public StatusCategory StatusCategory { get; set; } = null!;
-        public ICollection<ContractDetail> Details { get; set; }
+        public virtual StatusCategory StatusCategory { get; set; } = null!;
+        public virtual ICollection<ContractDetail> Details { get; set; }
         [ForeignKey(nameof(CustomerId))]
-        public Customer Customer { get; set; } = null!;
+        public virtual Customer Customer { get; set; } = null!;
     }
 }

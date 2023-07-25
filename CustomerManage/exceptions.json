@@ -1,8 +1,5 @@
 [
-  {
-    "code": 4010,
-    "message": "Authorization has been denied for this request"
-  },
+
   {
     "code": 5000,
     "message": "An error has occured"
@@ -38,5 +35,37 @@
   {
     "code": 4007,
     "message": "This contract has been signed before"
+  },
+  {
+    "code": 4008,
+    "message": "Can not verify you information. Please check you email information again"
+  },
+  {
+    "code": 4009,
+    "message": "Contract have not been signed yet. Can not send to customer."
+  },
+  {
+    "code": 4010,
+    "message": "Authorization has been denied for this request"
+  },
+  {
+    "code": 4011,
+    "message": "Your authentication information is invalid"
+  },
+  {
+    "code": 4012,
+    "message": "Can not do this action on administrator account"
+  },
+  {
+    "code": 4013,
+    "message": "Your account has been blocked"
+  },
+  {
+    "code": 4014,
+    "message": "Contract have not been approved yet. Can not sign"
+  },
+  {
+    "code": 4015,
+    "message": "Contract have to be activated before it can be approved."
   }
 ]

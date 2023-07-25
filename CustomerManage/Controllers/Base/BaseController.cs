@@ -15,12 +15,19 @@ namespace CusomterManager.Controllers.Base
     public class BaseController : ODataController
     {
         [ApiExplorerSettings(IgnoreApi = true)]
-        public string GetLoggedInUsername()
+        [NonAction]
+        public BusinessObject.Models.User GetLoggedInUser()
         {
             var user = this.User;
             string username = user.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value
                 ?? throw new CustomerManagementException(4010);
-            return username;
+            bool isAdmin = bool.TryParse(user.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Role)?.Value, out isAdmin);
+
+            return new()
+            {
+                Username = username,
+                IsAdmin = isAdmin
+            };
         }
     }
 }

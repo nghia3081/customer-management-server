@@ -8,6 +8,6 @@ namespace Repository.Entities
         {
             Packages = new HashSet<Package>();
         }
-        public ICollection<Package> Packages { get; set; }
+        public virtual ICollection<Package> Packages { get; set; }
     }
 }
